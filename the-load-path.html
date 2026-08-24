@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Load Path — A Daily Dispatch on How Things Hold Together</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700;8..60,900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper: #EAE6D9;
+    --paper-line: rgba(15,42,68,0.08);
+    --navy: #0F2A44;
+    --navy-2: #16385A;
+    --cyan: #7FC8E8;
+    --ink: #1A1B1E;
+    --ink-soft: #55575D;
+    --rule: #1A1B1E;
+    --accent: #C4401F;
+    --white: #FFFFFF;
+    --serif: 'Source Serif 4', Georgia, serif;
+    --sans: 'Inter', sans-serif;
+    --mono: 'IBM Plex Mono', monospace;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background: var(--paper);
+    background-image: repeating-linear-gradient(0deg, var(--paper-line) 0 1px, transparent 1px 32px);
+    color: var(--ink);
+    font-family: var(--sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection{ background: var(--accent); color:white; }
+  a{ color: var(--navy-2); }
+
+  .wrap{ max-width: 1120px; margin: 0 auto; padding: 0 22px; }
+
+  /* ---------------- Masthead ---------------- */
+  .masthead{ padding: 22px 0 0; }
+  .masthead-top{
+    display:flex; justify-content:space-between; align-items:center;
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.06em; color: var(--ink-soft);
+    padding-bottom: 8px; border-bottom: 1px solid var(--rule);
+  }
+  .masthead-title{ text-align:center; padding: 18px 0 10px; }
+  .masthead-title h1{
+    font-family: var(--serif); font-weight: 900; font-size: clamp(44px, 8vw, 78px);
+    margin: 0; letter-spacing: -0.01em; line-height: 0.95;
+  }
+  .masthead-title .kicker{
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.18em; color: var(--accent);
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .masthead-title .tagline{
+    font-family: var(--serif); font-style: italic; font-size: 15px; color: var(--ink-soft); margin-top: 6px;
+  }
+  .masthead-rule{ border: none; border-top: 3px solid var(--rule); border-bottom: 1px solid var(--rule); height:5px; margin: 12px 0 0; }
+  .masthead-bottom{
+    display:flex; justify-content:space-between; padding: 7px 0 18px;
+    font-family: var(--mono); font-size: 10.5px; letter-spacing:0.04em; color: var(--ink-soft); flex-wrap:wrap; gap:6px;
+  }
+  .masthead-bottom b{ color: var(--ink); }
+
+  /* ---------------- Layout ---------------- */
+  .content-grid{
+    display:grid; grid-template-columns: 1fr 300px; gap: 40px; padding-bottom: 60px;
+    align-items:start;
+  }
+  @media (max-width: 860px){ .content-grid{ grid-template-columns: 1fr; } }
+
+  /* ---------------- Article ---------------- */
+  .section-label{
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; color: var(--white);
+    background: var(--navy); display:inline-block; padding: 3px 10px; text-transform: uppercase;
+  }
+  .headline{
+    font-family: var(--serif); font-weight: 700; font-size: clamp(28px, 4vw, 42px);
+    line-height: 1.08; margin: 14px 0 8px;
+  }
+  .byline{
+    font-family: var(--mono); font-size: 11.5px; color: var(--ink-soft); letter-spacing:0.03em;
+    padding-bottom: 14px; border-bottom: 1px solid var(--paper-line); margin-bottom: 18px;
+    display:flex; gap: 14px; flex-wrap:wrap;
+  }
+  .byline b{ color: var(--ink); }
+
+  .figure{
+    float:right; width: 300px; margin: 0 0 14px 24px; border: 1.5px solid var(--navy); background: var(--navy);
+  }
+  .figure svg{ display:block; width:100%; height:auto; }
+  .figure figcaption{
+    font-family: var(--mono); font-size: 9.5px; letter-spacing:0.05em; color: var(--white);
+    background: var(--navy); padding: 6px 10px; border-top: 1px solid rgba(255,255,255,0.25);
+    text-transform: uppercase;
+  }
+  @media (max-width: 560px){ .figure{ float:none; width:100%; margin: 0 0 18px; } }
+
+  .lede{
+    font-family: var(--serif); font-size: 19px; line-height: 1.55; color: var(--ink);
+  }
+  .lede::first-letter{
+    font-family: var(--serif); font-weight:900; font-size: 58px; float:left; line-height: 0.78;
+    padding: 4px 6px 0 0; color: var(--navy);
+  }
+
+  .gist{
+    margin-top: 26px; clear: both; border-top: 1px solid var(--rule); padding-top: 16px;
+  }
+  .gist-row{ display:flex; gap: 14px; padding: 11px 0; border-bottom: 1px dashed var(--paper-line); }
+  .gist-row:last-child{ border-bottom:none; }
+  .gist-row .tag{
+    font-family: var(--mono); font-size: 10px; letter-spacing:0.07em; color: var(--accent); font-weight:700;
+    width: 118px; flex: none; padding-top:2px; text-transform: uppercase;
+  }
+  .gist-row p{ margin:0; font-size: 14.5px; line-height:1.55; }
+
+  /* ---------------- Sidebar ---------------- */
+  .side-box{
+    border: 1px solid var(--rule); margin-bottom: 26px; background: var(--white);
+  }
+  .side-box .side-head{
+    font-family: var(--mono); font-size: 10.5px; letter-spacing:0.1em; text-transform:uppercase;
+    background: var(--ink); color: white; padding: 7px 12px;
+  }
+  .side-box .side-body{ padding: 14px 14px 16px; }
+
+  .almanac-fact{ font-family: var(--serif); font-size: 13.5px; line-height:1.55; color: var(--ink); }
+  .almanac-fact .num{ font-family: var(--mono); color: var(--accent); font-weight:700; margin-right:4px; }
+
+  .archive-list{ list-style:none; margin:0; padding:0; max-height: 360px; overflow-y: auto; border: 1px solid var(--paper-line); }
+  .archive-list li{
+    padding: 8px 12px; border-bottom: 1px solid var(--paper-line); font-size: 12.5px; cursor:pointer;
+  }
+  .archive-list li:last-child{ border-bottom:none; }
+  .archive-list .a-date{ font-family: var(--mono); font-size: 9.5px; color: var(--ink-soft); display:block; margin-bottom:2px; }
+  .archive-list .a-title{ font-weight:600; }
+  .archive-list li:hover{ background: #F6F3EA; }
+  .archive-list li:hover .a-title{ color: var(--accent); }
+  .archive-list li.is-today{ background: #EAF2F7; }
+  .archive-list li.is-active{ background: var(--navy); }
+  .archive-list li.is-active .a-title{ color: white; }
+  .archive-list li.is-active .a-date{ color: var(--cyan); }
+  .browse-controls{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom: 10px; }
+  .browse-controls .nav-btn{
+    font-family: var(--mono); font-size: 11px; letter-spacing:0.04em; background: white; border: 1px solid var(--rule);
+    padding: 5px 9px; cursor:pointer; text-transform: uppercase;
+  }
+  .browse-controls .nav-btn:hover{ background: var(--ink); color:white; }
+  .browse-controls .today-btn{
+    font-family: var(--mono); font-size: 10.5px; letter-spacing:0.04em; background: none; border: none;
+    color: var(--navy-2); text-decoration: underline; cursor:pointer; padding: 5px 2px;
+  }
+  .viewing-banner{
+    display:none; font-family: var(--mono); font-size: 11px; background: var(--accent); color:white;
+    padding: 7px 12px; margin-bottom: 14px; letter-spacing:0.03em; align-items:center; justify-content:space-between;
+  }
+  .viewing-banner button{
+    font-family: var(--mono); font-size: 10.5px; background: white; color: var(--accent); border:none;
+    padding: 3px 9px; cursor:pointer; text-transform: uppercase; font-weight:700;
+  }
+
+  .sub-box input{
+    width:100%; padding: 9px 10px; border: 1px solid #C9C4B4; font-family: var(--sans); font-size: 13px;
+    margin-bottom: 8px; background: #FBFAF6;
+  }
+  .sub-box button{
+    width:100%; padding: 9px 10px; background: var(--navy); color:white; border:none; font-family: var(--mono);
+    font-size: 12px; letter-spacing:0.05em; text-transform: uppercase; cursor:pointer;
+  }
+  .sub-box button:hover{ background: var(--navy-2); }
+  .sub-box .fine{ font-size: 10.5px; color: var(--ink-soft); margin-top: 8px; line-height:1.5; }
+  .sub-box .toast{
+    display:none; font-size: 12px; color: var(--navy-2); background:#EAF2F7; border:1px solid #BFDBEA;
+    padding: 8px 10px; margin-top:8px; font-family: var(--sans);
+  }
+
+  .about-box p{ font-size: 12.5px; line-height:1.6; margin: 0 0 8px; color: var(--ink-soft); }
+  .about-box b{ color: var(--ink); }
+
+  footer.site-footer{
+    border-top: 3px solid var(--rule); padding: 22px 0 50px; text-align:center;
+    font-family: var(--mono); font-size: 10.5px; color: var(--ink-soft); letter-spacing:0.03em;
+  }
+  footer.site-footer .mono-strip{
+    margin-top:6px; opacity:0.6;
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="masthead">
+    <div class="masthead-top">
+      <span id="mh-date-left">—</span>
+      <span>SECTION A · ENGINEERING</span>
+      <span id="mh-nextissue">NEXT ISSUE IN —</span>
+    </div>
+    <div class="masthead-title">
+      <div class="kicker">A Daily Dispatch on How Things Hold Together</div>
+      <h1>The Load Path</h1>
+      <div class="tagline">Published every morning at 6:00 AM Eastern, without fail.</div>
+    </div>
+    <hr class="masthead-rule">
+    <div class="masthead-bottom">
+      <span><b>VOL. I</b> · NO. <span id="mh-issue">—</span></span>
+      <span>EST. 2026 · EDITED BY <b>KEVIN HALUSKA</b></span>
+      <span id="mh-price">SINGLE COPY · FREE</span>
+    </div>
+  </div>
+
+  <div class="content-grid">
+    <main>
+      <div class="viewing-banner" id="viewing-banner">
+        <span id="viewing-banner-text">Viewing a past issue</span>
+        <button id="back-to-today">Back to today</button>
+      </div>
+      <article id="article">
+        <!-- filled by JS -->
+      </article>
+    </main>
+
+    <aside>
+      <div class="side-box">
+        <div class="side-head">Almanac</div>
+        <div class="side-body">
+          <div class="almanac-fact" id="almanac-fact">Loading…</div>
+        </div>
+      </div>
+
+      <div class="side-box">
+        <div class="side-head">Browse Issues</div>
+        <div class="side-body">
+          <div class="browse-controls">
+            <button class="nav-btn" id="browse-older">&larr; Older</button>
+            <button class="today-btn" id="browse-today">Jump to today</button>
+            <button class="nav-btn" id="browse-newer">Newer &rarr;</button>
+          </div>
+          <ul class="archive-list" id="archive-list"></ul>
+        </div>
+      </div>
+
+      <div class="side-box sub-box">
+        <div class="side-head">Subscribe</div>
+        <div class="side-body">
+          <input type="email" id="sub-email" placeholder="you@university.edu">
+          <button id="sub-btn">Get tomorrow's issue</button>
+          <div class="toast" id="sub-toast">Noted — though this is a portfolio demo, so nothing's actually sent. Come back at 6am for the real thing.</div>
+          <div class="fine">One short dispatch a day. No archive spam, no tracking.</div>
+        </div>
+      </div>
+
+      <div class="side-box about-box">
+        <div class="side-head">About This Page</div>
+        <div class="side-body">
+          <p><b>The Load Path</b> runs on a fixed rotation: a new engineering topic every day at 6:00 AM Eastern, cycling through themed sections by day of the week.</p>
+          <p>Built by <b>Kevin Haluska</b>, an aspiring engineering student, as a running record of things worth understanding about how machines and structures work.</p>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <footer class="site-footer">
+    THE LOAD PATH — A DAILY DISPATCH ON HOW THINGS HOLD TOGETHER
+    <div class="mono-strip">EDITED BY KEVIN HALUSKA · UPDATES DAILY AT 06:00 EST</div>
+  </footer>
+</div>
+
+<script>
+(function(){
+
+  /* ================= DIAGRAMS (one blueprint schematic per section) ================= */
+  const DIAGRAMS = {
+    thermo: `<svg viewBox="0 0 400 260" xmlns="http://www.w3.org/2000/svg">
+      <rect width="400" height="260" fill="#0F2A44"/>
+      <g stroke="#7FC8E8" stroke-width="1" fill="none" opacity="0.9">
+        <rect x="130" y="50" width="90" height="150" rx="4"/>
+        <line x1="130" y1="90" x2="220" y2="90" stroke-dasharray="4 3"/>
+        <rect x="140" y="92" width="70" height="50" fill="none"/>
+        <line x1="175" y1="30" x2="175" y2="50"/>
+        <line x1="160" y1="30" x2="190" y2="30"/>
+        <path d="M175 200 L175 230" stroke-dasharray="2 3" opacity="0.5"/>
+        <path d="M240 100 C 260 100, 260 140, 240 140" />
+        <path d="M255 95 L 265 100 L 255 105" fill="#7FC8E8" stroke="none"/>
+        <path d="M255 135 L 265 140 L 255 145" fill="#7FC8E8" stroke="none"/>
+      </g>
+      <text x="20" y="240" font-family="IBM Plex Mono, monospace" font-size="9" fill="#7FC8E8" letter-spacing="1">P–V CYCLE / HEAT FLOW</text>
+      <text x="20" y="24" font-family="IBM Plex Mono, monospace" font-size="9" fill="#7FC8E8" letter-spacing="1">FIG. T-1</text>
+    </svg>`,
+
+    materials: `<svg viewBox="0 0 400 260" xmlns="http://www.w3.org/2000/svg">
+      <rect width="400" height="260" fill="#0F2A44"/>
+      <g stroke="#7FC8E8" stroke-width="1" fill="none">
+        <line x1="60" y1="210" x2="60" y2="30"/>
+        <line x1="60" y1="210" x2="360" y2="210"/>
+        <path d="M60 210 C 120 130, 150 90, 200 75 C 250 62, 300 55, 340 50" stroke-width="1.6"/>
+        <circle cx="200" cy="75" r="3.5" fill="#C4401F" stroke="none"/>
+        <line x1="200" y1="75" x2="200" y2="210" stroke-dasharray="3 3" opacity="0.5"/>
+      </g>
+      <text x="345" y="222" font-family="IBM Plex Mono, monospace" font-size="10" fill="#7FC8E8">&#949;</text>
+      <text x="42" y="35" font-family="IBM Plex Mono, monospace" font-size="10" fill="#7FC8E8">&#963;</text>
+      <text x="206" y="70" font-family="IBM Plex Mono, monospace" font-size="8" fill="#C4401F">YIELD</text>
+      <text x="20" y="240" font-family="IBM Plex Mono, monospace" font-size="9" fill="#7FC8E8" letter-spacing="1">STRESS–STRAIN CURVE</text>
+      <text x="20" y="24" font-family="IBM Plex Mono, monospace" font-size="9" fill="#7FC8E8" letter-spacing="1">FIG. M-1</text>
+    </svg>`,
+
+    robotics: `<svg viewBox="0 0 400 260" xmlns="http://www.w3.org/2000/svg">
+      <rect width="400" height="260" fill="#0F2A44"/>
+      <g stroke="#7FC8E8" stroke-width="1.4" fill="none">
+        <line x1="80" y1="200" x2="80" y2="150"/>
+        <line x1="80" y1="150" x2="180" y2="110"/>
+        <line x1="180" y1="110" x2="250" y2="150"/>
+        <circle cx="80" cy="150" r="8"/>
+        <circle cx="180" cy="110" r="8"/>
+        <circle cx="250" cy="150" r="6"/>
+      </g>
+      <path d="M270 150 C 300 150, 300 100, 270 90" stroke="#7FC8E8" stroke-width="1" fill="none" stroke-dasharray="3 3"/>
+      <path d="M262 88 L 272 90 L 266 98" fill="#C4401F" stroke="none"/>
+      <rect x="60" y="200" width="40" height="14" fill="none" stroke="#7FC8E8"/>
+      <text x="20" y="240" font-family="IBM Plex Mono, monospace" font-size="9" fill="#7FC8E8" letter-spacing="1">3-DOF ARM / FEEDBACK</text>
+      <text x="20" y="24" font-family="IBM Plex Mono, monospace" font-size="9" fill="#7FC8E8" letter-spacing="1">FIG. R-1</text>
+    </svg>`,
+
+    manufacturing: `<svg viewBox="0 0 400 260" xmlns="http://www.w3.org/2000/svg">
+      <rect width="400" height="260" fill="#0F2A44"/>
+      <g stroke="#7FC8E8" stroke-width="1" fill="none">
+        <circle cx="150" cy="120" r="55"/>
+        <circle cx="150" cy="120" r="14"/>
+        <g id="teeth"></g>
+        <circle cx="255" cy="150" r="30"/>
+        <circle cx="255" cy="150" r="8"/>
+        <line x1="60" y1="210" x2="340" y2="210" stroke-dasharray="2 4" opacity="0.6"/>
+        <line x1="300" y1="60" x2="330" y2="90"/>
+        <line x1="330" y1="60" x2="300" y2="90"/>
+      </g>
+      <text x="20" y="240" font-family="IBM Plex Mono, monospace" font-size="9" fill="#7FC8E8" letter-spacing="1">GEAR TRAIN / TOOLPATH</text>
+      <text x="20" y="24" font-family="IBM Plex Mono, monospace" font-size="9" fill="#7FC8E8" letter-spacing="1">FIG. P-1</text>
+    </svg>`,
+
+    history: `<svg viewBox="0 0 400 260" xmlns="http://www.w3.org/2000/svg">
+      <rect width="400" height="260" fill="#0F2A44"/>
+      <g stroke="#7FC8E8" stroke-width="1" fill="none">
+        <line x1="140" y1="60" x2="200" y2="190"/>
+        <line x1="260" y1="60" x2="200" y2="190"/>
+        <path d="M140 60 A 60 60 0 0 1 260 60" stroke-dasharray="3 3" opacity="0.6"/>
+        <line x1="90" y1="130" x2="310" y2="130" stroke-width="1.4"/>
+        <circle cx="200" cy="60" r="4"/>
+      </g>
+      <rect x="120" y="205" width="160" height="26" fill="none" stroke="#7FC8E8"/>
+      <text x="150" y="222" font-family="IBM Plex Mono, monospace" font-size="9" fill="#7FC8E8" letter-spacing="1">EST.</text>
+      <text x="20" y="24" font-family="IBM Plex Mono, monospace" font-size="9" fill="#7FC8E8" letter-spacing="1">FIG. H-1</text>
+    </svg>`,
+
+    mechanisms: `<svg viewBox="0 0 400 260" xmlns="http://www.w3.org/2000/svg">
+      <rect width="400" height="260" fill="#0F2A44"/>
+      <g stroke="#7FC8E8" stroke-width="1" fill="none">
+        <circle cx="120" cy="130" r="45"/>
+        <circle cx="120" cy="130" r="10"/>
+        <circle cx="205" cy="100" r="28"/>
+        <circle cx="205" cy="100" r="7"/>
+        <circle cx="270" cy="150" r="35"/>
+        <circle cx="270" cy="150" r="8"/>
+      </g>
+      <text x="20" y="240" font-family="IBM Plex Mono, monospace" font-size="9" fill="#7FC8E8" letter-spacing="1">LINKAGE / GEAR SET</text>
+      <text x="20" y="24" font-family="IBM Plex Mono, monospace" font-size="9" fill="#7FC8E8" letter-spacing="1">FIG. K-1</text>
+    </svg>`,
+
+    structures: `<svg viewBox="0 0 400 260" xmlns="http://www.w3.org/2000/svg">
+      <rect width="400" height="260" fill="#0F2A44"/>
+      <g stroke="#7FC8E8" stroke-width="1.2" fill="none">
+        <line x1="50" y1="190" x2="350" y2="190"/>
+        <polyline points="50,190 110,120 170,190 230,120 290,190 350,120"/>
+        <polyline points="110,120 170,190 230,120 290,190"/>
+      </g>
+      <path d="M170 60 L170 88" stroke="#C4401F" stroke-width="1.4"/>
+      <path d="M164 82 L170 90 L176 82" fill="#C4401F" stroke="none"/>
+      <text x="20" y="240" font-family="IBM Plex Mono, monospace" font-size="9" fill="#7FC8E8" letter-spacing="1">TRUSS / LOAD PATH</text>
+      <text x="20" y="24" font-family="IBM Plex Mono, monospace" font-size="9" fill="#7FC8E8" letter-spacing="1">FIG. S-1</text>
+    </svg>`
+  };
+
+  /* ================= TOPIC BANK ================= */
+  // day index: 0=Sun 1=Mon 2=Tue 3=Wed 4=Thu 5=Fri 6=Sat
+  const SECTIONS = {
+    1: { key:"thermo", label:"Thermodynamics & Energy", topics:[
+      {title:"The Carnot Cycle", lede:"Every heat engine, from a steam turbine to your car, is chasing an ideal it can never quite reach. The Carnot cycle is that ideal — a theoretical upper limit on how efficient any engine operating between two temperatures can possibly be.", what:"A theoretical thermodynamic cycle that defines the maximum possible efficiency of a heat engine.", why:"It sets the benchmark every real engine is measured against, and explains why no engine is ever 100% efficient.", how:"It uses four idealized, reversible steps — two isothermal, two adiabatic — that trade heat and work without any losses, which is why real engines can only approach it, never match it."},
+      {title:"Why Turbochargers Work", lede:"A turbocharger takes exhaust gas that would otherwise be wasted and uses it to force more air into the engine, letting a small engine breathe like a much larger one.", what:"A turbine-driven device that forces extra compressed air into an engine's cylinders.", why:"It lets manufacturers get more power from a smaller, lighter, more fuel-efficient engine.", how:"Exhaust gas spins a turbine wheel, which is connected by a shaft to a compressor wheel on the intake side, packing more air molecules into each cylinder for a bigger combustion event."},
+      {title:"The Second Law and Entropy", lede:"Heat flows from hot to cold, never the other way around on its own — and that one-way rule underlies almost every limit engineers run into.", what:"The principle that entropy, a measure of disorder, always increases in an isolated system over time.", why:"It's the reason no machine can be perfectly efficient, and why energy 'quality' degrades every time it's converted from one form to another.", how:"Every real process — friction, mixing, heat transfer across a temperature difference — generates some entropy that can't be recovered, which is what caps real-world efficiency below the theoretical ideal."},
+      {title:"Heat Pumps vs. Furnaces", lede:"A furnace makes heat. A heat pump moves it — and that difference is why heat pumps can be several times more efficient at keeping a house warm.", what:"A device that transfers heat from a cooler space to a warmer one using a refrigeration cycle in reverse.", why:"Because it moves existing heat instead of generating new heat from fuel, it can deliver more energy as warmth than it consumes as electricity.", how:"A refrigerant absorbs heat from outside air (even cold air still holds some), gets compressed to raise its temperature further, then releases that heat inside — the same cycle a refrigerator uses, just aimed the other direction."},
+      {title:"Refrigeration Cycles", lede:"Every fridge, AC unit, and freezer relies on the same trick: forcing a fluid to boil and condense on command to move heat somewhere it doesn't want to go.", what:"A closed loop that moves heat from a cold space to a warmer one using a circulating refrigerant.", why:"It's the basis of virtually all modern cooling technology, food preservation, and climate control.", how:"A compressor pressurizes refrigerant gas, which condenses into a liquid and releases heat; that liquid then expands and evaporates in the cold space, absorbing heat as it boils, before returning to the compressor to repeat."},
+      {title:"Combustion Engine Efficiency Limits", lede:"Even a perfectly tuned gasoline engine turns most of its fuel energy into heat, not motion — usually only around a third makes it to the wheels.", what:"The practical and theoretical ceilings on how much of a fuel's energy an internal combustion engine can convert to useful work.", why:"It explains why hybrid and electric drivetrains can be so much more efficient, and where automakers focus their engineering effort.", how:"Losses come from incomplete combustion, heat radiated to the cooling system and exhaust, and friction — each step chips away at the theoretical Otto-cycle efficiency before power ever reaches the crankshaft."},
+      {title:"Steam Turbines and Power Plants", lede:"Most of the world's electricity, even from nuclear and coal plants, is ultimately made the same way: by boiling water to spin a turbine.", what:"A rotating engine that extracts energy from pressurized steam to generate mechanical power, usually to drive a generator.", why:"It's the workhorse behind the majority of global electricity generation, regardless of what's used to boil the water.", how:"High-pressure steam expands through rows of angled blades on a rotor, converting thermal and pressure energy into rotational motion, before the cooled steam is condensed and pumped back to the boiler."},
+      {title:"The Otto Cycle Explained", lede:"The four strokes you learned about in a diagram — intake, compression, power, exhaust — have a name, and understanding it explains why compression ratio matters so much to performance.", what:"The idealized thermodynamic cycle that describes how a typical gasoline engine converts fuel into work.", why:"It's the theoretical backbone behind virtually every spark-ignition engine on the road.", how:"Air-fuel mixture is compressed, ignited to spike pressure and temperature, expands to push the piston down, then is exhausted — with efficiency rising as the compression ratio increases, up to the point where uncontrolled detonation, or knock, sets in."}
+    ]},
+    2: { key:"materials", label:"Materials Science", topics:[
+      {title:"Why Steel Bends Before It Breaks", lede:"A good structural steel gives you a warning before it fails — it visibly deforms first. That built-in margin is one of the most quietly important properties in engineering.", what:"Ductility — a material's ability to deform plastically before fracturing.", why:"It gives structures a visible warning sign of overload before catastrophic failure, instead of snapping without notice.", how:"Below the yield point, steel deforms elastically and springs back; past it, atomic planes slip permanently, absorbing energy and stretching visibly before the material's ultimate strength is finally exceeded."},
+      {title:"Fatigue Failure, Explained", lede:"A part can survive one massive overload and still fail from thousands of small, ordinary ones — that's fatigue, and it's one of the most common causes of mechanical failure.", what:"The progressive, localized damage a material accumulates under repeated cyclic loading, well below its ultimate strength.", why:"It explains why parts that seem 'fine' under a single load test can still fail unexpectedly after months of normal use.", how:"Microscopic cracks initiate at stress concentrations — a sharp corner, a scratch, a void — and grow a tiny amount with each load cycle until the remaining cross-section can no longer carry the load and fractures suddenly."},
+      {title:"Composite Materials in Aerospace", lede:"Modern aircraft are increasingly built from woven fibers glued together with resin instead of solid metal — and it's not just to save weight.", what:"Engineered materials made from two or more constituents — typically fibers and a resin matrix — combined to outperform either alone.", why:"They offer a strength-to-weight ratio metals can't match, directly cutting fuel burn on aircraft where every pound matters.", how:"Stiff, strong fibers (often carbon) carry the load, while a surrounding resin matrix binds them together and transfers stress between fibers, letting engineers tune strength and stiffness by direction, not just amount."},
+      {title:"The Stress-Strain Curve", lede:"One graph tells an engineer almost everything they need to know about how a material will behave — where it's safe, where it starts to give, and where it fails.", what:"A plot of a material's stress (load per area) against its strain (deformation) as it's pulled to failure.", why:"It's the single most-referenced material property chart in mechanical design, defining every safety margin engineers build in.", how:"The initial straight-line region shows elastic, reversible deformation; past the yield point the material deforms permanently; the curve peaks at ultimate strength before the material necks down and fractures."},
+      {title:"Why Aluminum Replaced Steel in Cars", lede:"Automakers didn't switch large body panels to aluminum because it's a better material overall — they switched because of one specific number: weight.", what:"A shift in vehicle body construction from steel to aluminum alloys for major structural and body panels.", why:"Lighter vehicles need less energy to accelerate, directly improving fuel economy and, for EVs, range.", how:"Aluminum has roughly a third the density of steel; engineers compensate for its lower strength and stiffness with thicker sections and different joining methods, still landing at a significant net weight savings."},
+      {title:"Heat Treatment and Hardening", lede:"The same steel can be soft enough to machine easily one day and hard enough to cut through other metal the next — without changing its composition at all.", what:"A family of processes that alter a metal's microstructure through controlled heating and cooling to change its mechanical properties.", why:"It lets engineers use one alloy for many different jobs, tuning hardness, strength, and toughness after the part is already shaped.", how:"Heating steel above a critical temperature then rapidly quenching it locks its atoms into a hard, strained crystal structure; a subsequent tempering step trades a little hardness back for much-needed toughness."},
+      {title:"3D-Printed Metals", lede:"Instead of cutting a part out of a solid block, additive manufacturing builds it up one microscopically thin layer of fused metal powder at a time.", what:"A manufacturing process that builds metal parts layer by layer, often by melting metal powder with a laser or electron beam.", why:"It enables complex internal geometries — like lattice structures or internal cooling channels — that are impossible to machine conventionally.", how:"A laser selectively melts a thin layer of metal powder according to a 3D model, the build plate lowers slightly, a new powder layer is spread, and the process repeats until the part is complete."},
+      {title:"Corrosion and How Engineers Fight It", lede:"Left alone, most metals slowly try to return to the ore they came from — corrosion is that process, and fighting it is a permanent part of engineering design.", what:"The gradual chemical or electrochemical degradation of a metal, most commonly through reaction with oxygen and moisture.", why:"Unchecked corrosion is one of the largest sources of infrastructure and equipment failure and maintenance cost worldwide.", how:"Engineers fight it with protective coatings, corrosion-resistant alloys, sacrificial anodes that corrode in a part's place, and design choices that avoid trapping moisture at joints and crevices."}
+    ]},
+    3: { key:"robotics", label:"Robotics & Controls", topics:[
+      {title:"PID Control Explained", lede:"Almost every self-stabilizing machine — a drone holding altitude, a cruise control holding speed — is quietly running some version of the same three-part math.", what:"A control algorithm that adjusts a system based on the Proportional, Integral, and Derivative of its error from a target value.", why:"It's the most widely used control strategy in engineering because it's simple, tunable, and works well on a huge range of systems.", how:"The proportional term reacts to current error, the integral term corrects for persistent small errors over time, and the derivative term dampens overshoot by reacting to how fast the error is changing."},
+      {title:"How a Robotic Arm Finds Its Position", lede:"A robotic arm doesn't 'know' where its hand is in space by default — every joint angle has to be converted into a real-world coordinate through math done many times per second.", what:"Forward and inverse kinematics — the math that relates a robot's joint angles to the position of its end effector.", why:"It's what lets a robot be told 'go here' in real-world coordinates instead of being manually walked through joint angles.", how:"Forward kinematics calculates hand position from known joint angles using each link's length and orientation; inverse kinematics solves the harder reverse problem — which joint angles produce a desired hand position — often with multiple valid solutions."},
+      {title:"Feedback Loops in Everyday Machines", lede:"A thermostat, a toilet's fill valve, and a car's cruise control all share the same underlying idea: measure the result, compare it to the target, and correct the difference.", what:"A system where the output of a process is measured and used to adjust future input, closing the loop between action and result.", why:"Feedback is what lets machines self-correct against disturbances instead of blindly following a fixed instruction.", how:"A sensor measures the current state, a controller compares it to the desired setpoint and computes an error, and an actuator adjusts the system to reduce that error — repeating continuously."},
+      {title:"Sensors: How Robots \u201cFeel\u201d", lede:"Before a robot can control anything, it has to perceive it — and the sensors doing that job are often the unglamorous key to whether a robot works at all.", what:"Devices that convert a physical quantity — position, force, light, distance — into an electrical signal a controller can use.", why:"A control system is only as good as the information it receives; bad sensor data leads directly to bad robot behavior.", how:"Encoders track rotation for position feedback, force/torque sensors detect contact and load, and IMUs combine accelerometers and gyroscopes to estimate orientation and motion — each feeding real-time data back into the control loop."},
+      {title:"The Inverted Pendulum Problem", lede:"Balancing a broomstick on your palm is a genuinely hard control problem — and it's also the classic benchmark engineers use to test whether a control system actually works.", what:"A benchmark control problem: keeping a pendulum balanced upright on a moving cart, an inherently unstable system.", why:"It's a simplified stand-in for real problems like rocket landing stabilization and two-wheeled self-balancing vehicles.", how:"A controller continuously measures the pendulum's tilt angle and rate of change, then moves the cart's base in the direction that counteracts the tilt before it grows — the same principle that keeps a Segway upright."},
+      {title:"Actuators: Muscles of a Machine", lede:"A robot can sense and decide all it wants — nothing happens until an actuator actually converts that decision into physical motion.", what:"A component that converts an energy source (electrical, hydraulic, pneumatic) into mechanical motion.", why:"The choice of actuator — a motor, a hydraulic cylinder, a pneumatic piston — sets the fundamental limits on a machine's speed, force, and precision.", how:"Electric motors trade off speed and torque through gearing, hydraulics deliver very high force in a compact package using pressurized fluid, and pneumatics offer fast, low-force motion using compressed air — each suited to different jobs."},
+      {title:"Path Planning for Autonomous Vehicles", lede:"Knowing where you are and where you want to go is only half the problem — a self-driving car also has to figure out a safe, smooth route between the two, in real time, around moving obstacles.", what:"The algorithms that compute a safe, feasible route from a vehicle's current position to a destination.", why:"It's the layer that turns raw sensor data and a destination into an actual sequence of steering and speed commands.", how:"The vehicle builds a map of free and occupied space from its sensors, a search algorithm finds a candidate path through the free space, and a smoothing/optimization step converts that path into something the vehicle can physically and comfortably drive."},
+      {title:"Degrees of Freedom in Mechanisms", lede:"Before an engineer designs how a mechanism moves, they first have to answer a deceptively simple question: how many independent ways can it move at all?", what:"The number of independent parameters needed to fully describe a mechanism's position and orientation in space.", why:"It determines how many actuators a mechanism needs and constrains what motions are even possible before any control system is designed.", how:"Each joint adds or removes freedom depending on its type — a pin joint allows one rotational freedom, a slider allows one translational freedom — and formulas like the Kutzbach criterion tally these up for an entire linkage."}
+    ]},
+    4: { key:"manufacturing", label:"Manufacturing & Production", topics:[
+      {title:"CNC Machining Basics", lede:"A block of aluminum becomes a finished part not by a machinist's steady hand, but by code — a set of coordinates a computer follows with sub-millimeter precision.", what:"Computer Numerical Control machining — subtractive manufacturing where a computer directs cutting tools to remove material from a workpiece.", why:"It's how the vast majority of precision metal parts are made, from prototypes to aerospace components.", how:"A CAD model is converted into G-code — a list of precise tool coordinates and speeds — which the machine's controller follows to move a spinning cutting tool along programmed paths, removing material layer by layer."},
+      {title:"Injection Molding Explained", lede:"Nearly every plastic object you own with a consistent, detailed shape — a phone case, a bottle cap, a car dashboard panel — was likely made by forcing molten plastic into a metal mold.", what:"A manufacturing process where molten material is injected under pressure into a mold cavity, then cooled and ejected as a finished part.", why:"It can produce thousands of identical, complex plastic parts per day at very low per-unit cost once the mold is made.", how:"Plastic pellets are melted and pushed by a screw into a precision steel mold cavity, held under pressure while it cools and solidifies, then the mold opens and ejector pins push the finished part free."},
+      {title:"Tolerance Stacking in Assemblies", lede:"No part is ever machined to a perfectly exact dimension — and when several imperfect parts are assembled together, those small errors can add up in ways that surprise engineers who don't plan for it.", what:"The cumulative effect of individual part tolerances when multiple components are assembled together.", why:"Ignoring it is a classic cause of parts that fit fine individually but don't assemble correctly together.", how:"Engineers use worst-case analysis (assuming every tolerance is at its extreme) or statistical analysis (assuming errors partially cancel out) to predict the total variation in a final assembled dimension, and set individual part tolerances accordingly."},
+      {title:"Lean Manufacturing Principles", lede:"Toyota's production system reshaped modern manufacturing around one core idea: anything that doesn't add value for the customer is waste, and waste should be relentlessly designed out.", what:"A production philosophy focused on eliminating waste — of time, material, motion, and inventory — while maximizing value delivered to the customer.", why:"It's the basis of modern manufacturing efficiency across nearly every industry, not just automotive.", how:"Techniques like just-in-time inventory, standardized work, and continuous small improvements (kaizen) work together to expose and eliminate the seven classic categories of manufacturing waste."},
+      {title:"Welding: A Field Guide", lede:"Joining two pieces of metal permanently usually means melting them together — but 'welding' covers a surprising range of very different processes for doing that.", what:"A group of processes that join materials, usually metals, by melting them together, often with a filler material added.", why:"Weld quality directly determines the structural integrity of everything from bridges to pressure vessels.", how:"Arc welding processes like MIG and TIG use an electric arc to melt the base metal and filler wire, while resistance welding uses electrical current and pressure — each process trading off speed, precision, and the skill required."},
+      {title:"Additive vs. Subtractive Manufacturing", lede:"There are really only two ways to make a shape: start with too much material and remove the excess, or start with nothing and build up exactly what you need.", what:"Two fundamentally different manufacturing philosophies — 3D printing (additive) versus machining (subtractive).", why:"Choosing the right one affects cost, lead time, achievable geometry, and material properties of the final part.", how:"Subtractive processes cut away material with tools, offering excellent surface finish and strength but generating waste; additive processes build parts layer by layer, enabling complex geometry with less waste but often at slower speeds and higher per-part cost at volume."},
+      {title:"Quality Control on the Production Line", lede:"Making a part is only half the job — proving, consistently and at scale, that every single unit actually meets spec is its own engineering discipline.", what:"The systems and processes used to verify that manufactured parts meet their design specifications.", why:"A defect that reaches a customer is far more expensive to fix than one caught on the line — in cost, safety, and trust.", how:"Statistical process control tracks measurements over time to catch a process drifting out of spec before it produces bad parts, while inspection — visual, dimensional, or automated with vision systems — checks finished parts directly against tolerance."},
+      {title:"The Assembly Line, Revisited", lede:"Henry Ford didn't invent the assembly line, but he perfected the idea that made mass production possible: bring the work to the worker, not the other way around.", what:"A manufacturing process where a product moves through a sequence of workstations, each adding one part of the total assembly.", why:"It dramatically cut the time and cost to build complex products, making mass-market manufacturing possible for the first time.", how:"Work is broken into small, standardized, repeatable tasks distributed along a moving line, with the line's speed set to balance workload evenly across every station — a concept called line balancing."}
+    ]},
+    5: { key:"history", label:"Historical Engineering Feats", topics:[
+      {title:"The Hoover Dam", lede:"Built during the Great Depression, the Hoover Dam remains one of the most audacious concrete structures ever attempted — and its designers had to invent new construction methods just to keep the concrete from cracking as it cured.", what:"A massive concrete arch-gravity dam on the Colorado River, completed in 1936.", why:"It demonstrated that infrastructure at an unprecedented scale was possible, and it still supplies power and water to millions.", how:"Engineers poured the dam in interlocking columns rather than one continuous mass, embedding cooling pipes to remove the heat generated as the concrete cured — without which the dam would have taken decades to cool and set safely."},
+      {title:"The Wright Brothers' First Flight", lede:"Before the Wrights ever left the ground, they spent years testing wing shapes in a homemade wind tunnel — the flight itself was the final step of a genuinely systematic engineering process.", what:"The first sustained, controlled, powered flight of a heavier-than-air aircraft, achieved in 1903.", why:"It marked the birth of practical aeronautical engineering, built on rigorous testing rather than guesswork.", how:"The Wrights solved the problem of control — not just lift — by inventing wing warping for roll control, and validated their airfoil designs empirically using a wind tunnel of their own design after published aerodynamic data proved unreliable."},
+      {title:"The Panama Canal's Locks", lede:"Rather than dig a sea-level channel through mountainous terrain, engineers solved the Panama Canal problem by lifting ships over the land instead — 85 feet up, and back down again.", what:"A series of massive water-filled chambers that raise and lower ships between sea level and an elevated lake to cross the isthmus.", why:"It cut the sea voyage between the Atlantic and Pacific by thousands of miles, reshaping global shipping.", how:"Each lock chamber floods or drains using gravity alone, with valves controlling enormous culverts embedded in the lock walls, raising or lowering a ship along with the water level around it."},
+      {title:"The Apollo Guidance Computer", lede:"The computer that helped land astronauts on the Moon had less processing power than a modern calculator — and its engineers had to invent entirely new fault-tolerant software just to trust it with human lives.", what:"The onboard flight computer that provided guidance, navigation, and control for the Apollo spacecraft.", why:"It pioneered integrated circuit use and real-time operating system design that influenced computing far beyond the space program.", how:"It ran a priority-based real-time operating system that could interrupt lower-priority tasks to handle critical alarms — famously overloading and recovering during the Apollo 11 landing without aborting the mission."},
+      {title:"The Eiffel Tower's Wind Design", lede:"Gustave Eiffel's tower isn't shaped the way it is for style — its curved, tapering profile was calculated almost entirely around resisting wind, decades before anyone had a wind tunnel to test it in.", what:"A wrought-iron lattice tower completed in 1889, whose form was mathematically derived to minimize wind resistance.", why:"It's an early, striking example of a structure's aesthetic form emerging directly from structural calculation, not the other way around.", how:"Eiffel's engineers calculated the curve so that the moment created by wind load at any height would be resisted by the tower's cross-section at that height, producing a shape optimized purely by physics."},
+      {title:"The First Transcontinental Railroad", lede:"Connecting the two coasts of the United States by rail meant blasting through the Sierra Nevada mountains by hand, with black powder, in winter — a construction challenge as much as an engineering one.", what:"A 1,912-mile continuous railroad line completed in 1869, connecting the existing eastern U.S. rail network to California.", why:"It cut a journey that once took months down to about a week, transforming national trade and settlement.", how:"Crews building from the east laid track across plains and grades, while crews building from the west blasted tunnels directly through granite in the Sierra Nevada, meeting at a single point marked by the famous golden spike."},
+      {title:"The Golden Gate Bridge", lede:"When it opened in 1937, the Golden Gate Bridge was the longest suspension bridge span in the world, built across a strait with brutal currents, fog, and wind that engineers had been told for years made a bridge there impossible.", what:"A suspension bridge spanning the Golden Gate strait, with a main span that held the world-length record for nearly three decades.", why:"It proved that a suspension bridge could be built across conditions previously considered unbuildable, pushing the field forward.", how:"Two main cables, each made of over 27,000 individual wires spun in place, drape between the towers and carry the deck's load in tension down to massive anchorages on either shore."},
+      {title:"The Saturn V Rocket", lede:"The Saturn V remains the most powerful machine humans have ever successfully flown — and every one of its five first-stage engines had to work perfectly, because there was no way to test-fire the full stack before launch.", what:"The three-stage rocket that launched the Apollo missions to the Moon, still the most powerful rocket ever flown successfully.", why:"It represents the practical ceiling of chemical rocket engineering at the time, and much of its design still informs launch vehicles today.", how:"Each stage burned its fuel and fell away once spent, progressively lightening the vehicle so the remaining stages could accelerate the payload further — a staging strategy that remains fundamental to orbital rocketry."}
+    ]},
+    6: { key:"mechanisms", label:"Mechanisms & Machines", topics:[
+      {title:"The Geneva Drive", lede:"Old film projectors needed to advance each frame with a sharp, precise jerk and then hold it perfectly still — a single elegant mechanism did that job with no electronics at all.", what:"A mechanism that converts continuous rotation into intermittent rotation, pausing between each step.", why:"It's a purely mechanical way to create precise, repeatable indexed motion, once essential in film projectors and clock mechanisms.", how:"A rotating drive wheel with a single pin engages slots in a driven wheel only during part of its rotation, advancing it a fixed angle before disengaging and locking it in place until the next pass."},
+      {title:"Rube Goldberg Machines, Seriously", lede:"They're built as jokes, but Rube Goldberg machines are a genuine — if absurd — exercise in the same skill engineers use every day: chaining cause and effect precisely enough that it actually works.", what:"An intentionally overcomplicated machine designed to perform a simple task through an absurdly long chain of reactions.", why:"Despite the comedy, building one forces real engineering skills: energy transfer, timing, tolerance, and reliable triggering.", how:"Each stage has to reliably deliver just enough energy to trigger the next — too little and the chain stalls, too much and it becomes unpredictable — which is exactly the same margin problem serious engineers manage in real systems."},
+      {title:"The Swash Plate", lede:"A helicopter's rotor blades have to change their angle dramatically, multiple times per second, while spinning at high speed — one clever rotating disc makes that possible.", what:"A mechanism that translates a stationary control input into a rotating, cyclically changing output, most famously used in helicopter rotors.", why:"It's what allows a helicopter pilot to tilt and steer the aircraft by changing blade pitch on the fly.", how:"A non-rotating plate, tilted by the pilot's controls, is linked through bearings to a rotating plate above it, which pushes and pulls the linkage to each rotor blade — changing blade pitch differently at different points in the rotation."},
+      {title:"Four-Bar Linkages", lede:"Windshield wipers, folding chairs, and backhoe arms all rely on one of the simplest and most versatile mechanisms in mechanical design: four rigid links connected in a loop.", what:"A mechanism made of four rigid links connected end-to-end in a closed loop, one of the most fundamental building blocks in mechanism design.", why:"With just four links, an enormous range of motion paths can be produced, making it one of the most widely reused mechanisms in engineering.", how:"One link is fixed as the frame; as the input link rotates or oscillates, the geometry of the remaining links forces a specific, repeatable motion path in the output link — the exact path depending entirely on the relative lengths chosen."},
+      {title:"The Differential Gear", lede:"When a car turns, its outer wheels have to travel farther and spin faster than the inner wheels — the differential is the century-old mechanism that quietly makes that possible.", what:"A gear set that allows two output shafts to rotate at different speeds while still receiving power from a single input.", why:"Without it, a vehicle's wheels would be forced to spin at the same speed, causing tire scrubbing and loss of control in every turn.", how:"Power enters through a ring gear and spins a carrier holding small pinion gears; those pinions mesh with two side gears connected to each wheel, allowing the side gears to rotate at different speeds while still both receiving torque."},
+      {title:"Escapements: The Heart of a Clock", lede:"A pendulum swinging back and forth doesn't naturally turn into ticking gears — a small, precise mechanism called an escapement has to release the clock's gear train one controlled tick at a time.", what:"A mechanism that regulates the release of energy in a mechanical clock, converting continuous energy into a steady, countable tick.", why:"It's the component that made mechanical timekeeping precise enough to be useful, centuries before electronics existed.", how:"A toothed wheel driven by the clock's mainspring is periodically caught and released by a rocking anchor tied to the pendulum's swing, allowing exactly one tooth to pass per swing and converting that swing into steady rotational motion."},
+      {title:"The Slider-Crank Mechanism", lede:"Nearly every piston engine ever built relies on the same basic mechanism to turn back-and-forth motion into rotation — or, run in reverse, rotation into back-and-forth motion.", what:"A mechanism that converts rotational motion into linear motion, or vice versa, using a rotating crank connected to a sliding piston.", why:"It's the core mechanism inside essentially every reciprocating engine and pump ever built.", how:"A connecting rod links a rotating crank to a piston constrained to move in a straight line; as the crank rotates, the piston is pushed and pulled through its stroke, with the connecting rod's angle changing continuously to accommodate the geometry."},
+      {title:"Ratchets and Pawls", lede:"A socket wrench that lets you turn it one way and click freely the other is running one of the oldest one-way mechanisms in mechanical engineering.", what:"A mechanism that allows rotational or linear motion in only one direction, using a toothed wheel and a spring-loaded pawl.", why:"It's a purely mechanical way to enforce one-directional motion, used everywhere from wrenches to climbing gear to clock mainsprings.", how:"A spring-loaded pawl rides over the ratchet's angled teeth in the free direction, then catches against a steep face the moment motion reverses, locking the mechanism instantly without any electronics."}
+    ]},
+    0: { key:"structures", label:"Structures & Design", topics:[
+      {title:"Trusses: Triangles Everywhere", lede:"Bridges, roof frames, and radio towers all lean on the same geometric fact: a triangle, unlike a square, can't change shape without one of its sides changing length.", what:"A structural framework made entirely of triangular units, used to span distances efficiently with minimal material.", why:"Triangulated structures are inherently rigid, letting engineers span long distances using far less material than a solid beam would need.", how:"Loads applied to a truss are resolved into pure tension and compression forces along each individual member — no bending — which lets slender members carry surprisingly large loads."},
+      {title:"Why Arches Don't Collapse", lede:"A stone arch has no glue holding it together, no bolts, sometimes no mortar at all — and yet it can stand for a thousand years, because of how it channels force.", what:"A curved structural form that spans an opening by converting vertical load into compression along the curve.", why:"It let ancient builders span large openings using only stone or brick — materials strong in compression but weak in tension — without any modern materials.", how:"The weight above the arch pushes down and outward along the curve, and every stone in the arch is squeezed in compression against its neighbors, transferring the load down to the supports at each end, called abutments, which must resist that outward thrust."},
+      {title:"Load Paths in Everyday Objects", lede:"Every force applied to anything — a backpack strap, a chair leg, a phone case — has to travel somewhere before it's finally resisted, and tracing that route is one of the first things a structural engineer learns to do.", what:"The route a force travels through a structure, from where it's applied to where it's ultimately resisted.", why:"A poorly understood load path is a classic, quiet cause of failure — force routing through a part never designed to carry it.", how:"Engineers trace the load from its application point through every connected member and joint down to a final support or foundation, checking that every link in that chain is strong enough to carry it — the same word this publication borrows its name from."},
+      {title:"Suspension Bridges Explained", lede:"A suspension bridge doesn't hold its deck up from below — it hangs the entire roadway from cables draped overhead, letting the whole structure work almost entirely in tension.", what:"A bridge design where the deck is suspended from main cables that drape between towers and anchor into the ground at each end.", why:"It allows the longest clear spans of any bridge type, since cables in tension are extremely material-efficient.", how:"The deck hangs from vertical suspender cables connected to the main cables, which drape over tall towers and are anchored firmly at each end; the towers carry compression down to their foundations while the cables carry the deck's weight in pure tension."},
+      {title:"The Cantilever", lede:"A diving board, a balcony, an aircraft wing — all of them are held up at only one end, and all of them rely on the same structural principle to keep from simply falling.", what:"A rigid structural element supported at only one end, extending horizontally into open space.", why:"It allows structures to project outward — balconies, bridge sections, aircraft wings — without support directly beneath them.", how:"The fixed end must resist both the bending moment and shear force created by the unsupported length, which is why cantilevers are typically thickest and most heavily reinforced right where they attach to their support."},
+      {title:"Buckling: When Columns Fail", lede:"A slender column can fail well before the material itself would ever crush — not because it's too weak, but because it suddenly bows sideways under a load it could easily handle if it were shorter or thicker.", what:"A sudden sideways instability failure that can occur in slender structural members under compression, distinct from material crushing.", why:"It's a failure mode that can't be predicted from material strength alone, which is why column design depends heavily on length and shape, not just cross-sectional area.", how:"Past a critical load — described by Euler's buckling formula — any tiny imperfection or off-axis force causes the column to bow sideways, and once it starts, the bending itself increases the load's leverage, leading to rapid, often sudden failure."},
+      {title:"Moment of Inertia, Intuitively", lede:"Two beams can be made of the exact same amount of material and the same steel, yet one resists bending dramatically better than the other — because of how that material is arranged, not how much there is.", what:"A geometric property that measures how a cross-section's material is distributed relative to a bending axis.", why:"It's why an I-beam is so much stiffer than a solid rectangular bar of the same weight — shape matters as much as material.", how:"Material located farther from the bending axis contributes disproportionately more resistance to bending, since the formula weights distance by its square — which is exactly why I-beams push most of their material to the top and bottom flanges, far from the center."},
+      {title:"Factor of Safety: How Much Is Enough?", lede:"Engineers rarely design a part to survive exactly the load it's expected to see — they deliberately over-build it, and deciding by how much is its own engineering judgment call.", what:"The ratio between a structure's actual failure load and the maximum load it's expected to experience in service.", why:"It accounts for real-world uncertainty — material variability, unexpected loads, manufacturing defects — that a pure calculation can't capture.", how:"Engineers choose a factor based on the consequences of failure and the confidence in their load estimates — a low-consequence, well-understood application might use 1.5, while human-rated aerospace hardware might demand far higher margins."}
+    ]}
+  };
+
+  const ALMANAC = [
+    "A single sheet of standard printer paper, folded in half 7 times, becomes about as thick as a stack of 128 sheets — folding scales exponentially, which is why more than about 8 folds is nearly impossible by hand.",
+    "The Panama Canal's lock chambers use no pumps at all — every fill and drain cycle relies entirely on gravity and elevation.",
+    "A Boeing 747's wings are designed to flex up to about 26 feet at the tips during severe turbulence — that flexibility is intentional, not a flaw.",
+    "The Golden Gate Bridge's main cables each contain over 27,000 individual strands of wire, spun in place during construction rather than manufactured as a single cable.",
+    "The Wright Flyer's first flight in 1903 covered less distance than the wingspan of a modern Boeing 747.",
+    "A standard shipping container's dimensions were standardized in the 1960s specifically to make loading, stacking, and crane handling identical worldwide.",
+    "The Eiffel Tower grows about 6 inches taller in the summer heat, as the iron expands.",
+    "Early steam locomotive boilers were a leading cause of industrial accidents until standardized pressure-relief valves became mandatory.",
+    "The Apollo Guidance Computer had roughly 64KB of memory — a modern smartphone has memory literally millions of times larger.",
+    "The word 'engineer' comes from the Latin ingenium, meaning cleverness or natural capacity — the same root as 'ingenious.'",
+    "A well-designed truss bridge can span the same distance as a solid beam bridge using a small fraction of the material.",
+    "The Hoover Dam used enough concrete to build a two-lane highway from San Francisco to New York.",
+    "Titanium is roughly as strong as some steels but about 45% lighter, which is why it shows up heavily in aerospace and medical implants.",
+    "The Geneva drive mechanism, once common in film projectors, gets its name from its resemblance to the Geneva cross symbol.",
+    "A modern jet engine's turbine blades can operate in temperatures hotter than the melting point of the metal they're made from, thanks to internal cooling channels.",
+    "The Saturn V rocket's five F-1 engines together produced more thrust at liftoff than the combined output of all the jet engines flying over the U.S. at that same moment.",
+    "The first practical ballpoint pen relied on a small rotating ball to solve a problem fountain pens couldn't: consistent ink flow without smudging.",
+    "A suspension bridge's cables are almost entirely in tension, while its towers are almost entirely in compression — the same structure using two completely different load types at once.",
+    "The Curiosity rover's landing sequence, nicknamed '7 minutes of terror,' had to execute entirely autonomously since radio signals took too long to reach Earth for real-time control.",
+    "Early differential gears date back to at least the 1st century BC, used in ancient Greek geared mechanisms long before the automobile existed."
+  ];
+
+  /* ================= DATE / ISSUE LOGIC ================= */
+  const LAUNCH_DATE_UTC = Date.UTC(2026, 0, 5); // Mon, Jan 5 2026 — arbitrary fixed epoch
+
+  function nyPartsFor(date){
+    const fmt = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/New_York', year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', hour12:false
+    });
+    const parts = {};
+    fmt.formatToParts(date).forEach(p=>{ if(p.type!=='literal') parts[p.type]=parseInt(p.value,10); });
+    return parts; // {year, month, day, hour}
+  }
+
+  function getIssueDateUTC(now){
+    const p = nyPartsFor(now);
+    let y=p.year, m=p.month, d=p.day;
+    // build a UTC-midnight date representing this NY calendar day
+    let issue = Date.UTC(y, m-1, d);
+    if(p.hour < 6){
+      issue -= 86400000; // before 6am NY -> still showing yesterday's issue
+    }
+    return issue;
+  }
+
+  function daysBetween(a,b){ return Math.round((a-b)/86400000); }
+
+  function pickForIssueDate(issueUTC){
+    const d = new Date(issueUTC);
+    const weekday = d.getUTCDay(); // 0-6, matches SECTIONS keys
+    const section = SECTIONS[weekday];
+    const daysSinceLaunch = daysBetween(issueUTC, LAUNCH_DATE_UTC);
+    const weekNum = Math.floor(daysSinceLaunch/7);
+    const topicIdx = ((weekNum % section.topics.length) + section.topics.length) % section.topics.length;
+    const topic = section.topics[topicIdx];
+    const issueNumber = daysSinceLaunch + 1;
+    const almanacIdx = ((daysSinceLaunch % ALMANAC.length) + ALMANAC.length) % ALMANAC.length;
+    return { section, topic, issueNumber, issueUTC, almanac: ALMANAC[almanacIdx], daysSinceLaunch };
+  }
+
+  function fmtDateLong(utcMillis){
+    return new Date(utcMillis).toLocaleDateString('en-US', {timeZone:'UTC', weekday:'long', year:'numeric', month:'long', day:'numeric'});
+  }
+  function fmtDateShort(utcMillis){
+    return new Date(utcMillis).toLocaleDateString('en-US', {timeZone:'UTC', month:'short', day:'numeric', year:'numeric'});
+  }
+
+  /* ================= RENDER ================= */
+  let todayIssueUTC = null;      // the real, live issue as of now
+  let viewingIssueUTC = null;    // whichever issue is currently shown in the article
+  let browseOffsetDays = -14;    // start of the visible archive window, in days relative to today
+  const BROWSE_WINDOW = 30;      // how many days are listed at once
+  const BROWSE_PAGE = 15;        // how far Older/Newer shifts the window
+
+  function renderArticle(issueUTC){
+    viewingIssueUTC = issueUTC;
+    const issue = pickForIssueDate(issueUTC);
+    const sec = issue.section, top = issue.topic;
+
+    document.getElementById('article').innerHTML = `
+      <span class="section-label">${sec.label}</span>
+      <h2 class="headline">${top.title}</h2>
+      <div class="byline">
+        <span>By <b>Kevin Haluska</b></span>
+        <span>${fmtDateShort(issue.issueUTC)}</span>
+        <span>SECTION ${sec.label.toUpperCase()}</span>
+      </div>
+      <figure class="figure">
+        ${DIAGRAMS[sec.key]}
+        <figcaption>Fig. ${top.title}</figcaption>
+      </figure>
+      <p class="lede">${top.lede}</p>
+      <div class="gist">
+        <div class="gist-row"><span class="tag">What it is</span><p>${top.what}</p></div>
+        <div class="gist-row"><span class="tag">Why it matters</span><p>${top.why}</p></div>
+        <div class="gist-row"><span class="tag">How it works</span><p>${top.how}</p></div>
+      </div>
+    `;
+    document.getElementById('almanac-fact').innerHTML = '<span class="num">&#9670;</span>' + issue.almanac;
+
+    const banner = document.getElementById('viewing-banner');
+    if(issueUTC === todayIssueUTC){
+      banner.style.display = 'none';
+    }else{
+      const isFuture = issueUTC > todayIssueUTC;
+      document.getElementById('viewing-banner-text').textContent =
+        (isFuture ? 'Previewing a future issue — No. ' : 'Viewing a past issue — No. ')
+        + issue.issueNumber + ', ' + fmtDateShort(issueUTC);
+      banner.style.display = 'flex';
+    }
+
+    renderArchiveList();
+  }
+
+  function renderArchiveList(){
+    let html = "";
+    for(let i=0; i<BROWSE_WINDOW; i++){
+      const dayOffset = browseOffsetDays + i;
+      const dayUTC = todayIssueUTC + dayOffset*86400000;
+      const dayIssue = pickForIssueDate(dayUTC);
+      const classes = [];
+      if(dayUTC === todayIssueUTC) classes.push('is-today');
+      if(dayUTC === viewingIssueUTC) classes.push('is-active');
+      const tagBits = [];
+      if(dayUTC === todayIssueUTC) tagBits.push('TODAY');
+      if(dayUTC > todayIssueUTC) tagBits.push('UPCOMING');
+      const tag = tagBits.length ? ` &middot; ${tagBits[0]}` : '';
+      html += `<li class="${classes.join(' ')}" data-issue-utc="${dayUTC}">`
+        + `<span class="a-date">${fmtDateShort(dayUTC)} &middot; No. ${dayIssue.issueNumber}${tag}</span>`
+        + `<span class="a-title">${dayIssue.topic.title}</span></li>`;
+    }
+    const list = document.getElementById('archive-list');
+    list.innerHTML = html;
+    const active = list.querySelector('.is-active');
+    if(active) active.scrollIntoView({block:'nearest'});
+  }
+
+  document.getElementById('archive-list').addEventListener('click', function(e){
+    const li = e.target.closest('li[data-issue-utc]');
+    if(!li) return;
+    renderArticle(parseInt(li.dataset.issueUtc, 10));
+  });
+  document.getElementById('browse-older').addEventListener('click', function(){
+    browseOffsetDays -= BROWSE_PAGE;
+    renderArchiveList();
+  });
+  document.getElementById('browse-newer').addEventListener('click', function(){
+    browseOffsetDays += BROWSE_PAGE;
+    renderArchiveList();
+  });
+  document.getElementById('browse-today').addEventListener('click', function(){
+    browseOffsetDays = -14;
+    renderArticle(todayIssueUTC);
+  });
+  document.getElementById('back-to-today').addEventListener('click', function(){
+    browseOffsetDays = -14;
+    renderArticle(todayIssueUTC);
+  });
+
+  function render(){
+    const now = new Date();
+    todayIssueUTC = getIssueDateUTC(now);
+    const todayIssue = pickForIssueDate(todayIssueUTC);
+
+    document.getElementById('mh-date-left').textContent = fmtDateLong(todayIssueUTC).toUpperCase();
+    document.getElementById('mh-issue').textContent = todayIssue.issueNumber;
+
+    renderArticle(todayIssueUTC);
+    updateCountdown();
+  }
+
+  function updateCountdown(){
+    const now = new Date();
+    // seconds until next 6:00 NY time
+    const nowNY = new Date(now.toLocaleString('en-US', {timeZone:'America/New_York'}));
+    let next = new Date(nowNY);
+    next.setHours(6,0,0,0);
+    if(nowNY.getTime() >= next.getTime()) next.setDate(next.getDate()+1);
+    const diffMs = next.getTime() - nowNY.getTime();
+
+    // the instant we cross 6am, re-render the whole issue, not just the clock
+    if(diffMs <= 0){
+      render();
+      return;
+    }
+
+    const h = Math.floor(diffMs/3600000);
+    const m = Math.floor((diffMs%3600000)/60000);
+    const s = Math.floor((diffMs%60000)/1000);
+    const pad = n => String(n).padStart(2,'0');
+    document.getElementById('mh-nextissue').textContent =
+      `NEXT ISSUE IN ${pad(h)}:${pad(m)}:${pad(s)}`;
+  }
+
+  /* ================= Subscribe (visual only, transparent) ================= */
+  document.getElementById('sub-btn').addEventListener('click', function(){
+    const toast = document.getElementById('sub-toast');
+    toast.style.display = 'block';
+  });
+
+  render();
+  setInterval(updateCountdown, 1000);
+
+})();
+</script>
+</body>
+</html>
